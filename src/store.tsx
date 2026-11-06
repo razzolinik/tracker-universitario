@@ -90,7 +90,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
       }
       const items =
-        modo === 'reemplazar' && r.tipo === 'entregas'
+        modo === 'reemplazar' && r.items.length > 0
           ? [...d.items.filter((i) => !tocadas.has(i.materiaId)), ...r.items]
           : // "agregar" no duplica: si ya existe una entrega con el mismo título en esa materia, se conserva la tuya
             [...d.items, ...r.items.filter((n) => !d.items.some((i) => i.materiaId === n.materiaId && norm(i.titulo) === norm(n.titulo)))];

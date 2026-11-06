@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Download, FileUp, RotateCcw, Upload, FileJson, ClipboardPaste } from 'lucide-react';
 import { materiaById, tipoInfo } from '../data/plan';
 import {
-  PLANTILLA_ENTREGAS, PLANTILLA_MATERIAS, descargar, exportarEntregas, exportarMaterias, importarCSV, type ImportResult,
+  COLUMNAS, PLANTILLA, descargar, exportarTodo, importarCSV, type ImportResult,
 } from '../lib/csv';
 import { fechaCorta, hoyISO } from '../lib/logic';
 import { VACIO, datosEjemplo, useStore } from '../store';
@@ -75,13 +75,13 @@ export function DatosView() {
           {res && (
             <div className="card fade-in">
               <div className="card-head">
-                <h3>Vista previa · {res.tipo === 'entregas' ? 'Entregas' : res.tipo === 'materias' ? 'Materias' : '¿?'}</h3>
+                <h3>Vista previa · {Object.keys(res.materias).length} materias · {res.items.length} entregas</h3>
                 <span className="pill">{res.filas} filas</span>
               </div>
               {res.errores.length > 0 && (
                 <div className="err-list" style={{ marginBottom: 12 }}>{res.errores.map((e, i) => <div key={i}>⚠ {e}</div>)}</div>
               )}
-              {res.tipo === 'entregas' && (
+              {res.items.length > 0 && (
                 <div className="tbl-wrap" style={{ maxHeight: 280, overflow: 'auto' }}>
                   <table className="tbl">
                     <thead><tr><th>Materia</th><th>Qué</th><th>Fecha</th><th>Grupo</th></tr></thead>
@@ -98,7 +98,7 @@ export function DatosView() {
                   </table>
                 </div>
               )}
-              {res.tipo === 'materias' && (
+              {Object.keys(res.materias).length > 0 && (
                 <div className="tbl-wrap" style={{ maxHeight: 280, overflow: 'auto' }}>
                   <table className="tbl">
                     <thead><tr><th>Materia</th><th>Estado</th><th>Nota</th><th>Modalidad</th><th>Req.</th></tr></thead>
@@ -139,24 +139,22 @@ export function DatosView() {
           <div className="card">
             <div className="card-head"><h2>Formato</h2></div>
             <p className="small muted" style={{ marginBottom: 10 }}>
-              Dos tipos de archivo. La columna <b>materia</b> acepta el nombre (“Programación III”, “prog 3”), la abreviatura (“BD II”) o el número (“9”).
+              Un solo archivo con todo. Cada fila es una materia <b>o</b> una entrega:
+              si la columna <b>titulo</b> está vacía, la fila carga el estado de la materia; si tiene título, es una entrega.
+              Las columnas pueden ir en cualquier orden y las que no uses pueden faltar.
             </p>
-            <h3 style={{ fontSize: 15, marginBottom: 6 }}>📦 Entregas</h3>
-            <pre className="code">{`materia, tipo, titulo, fecha, estado, nota, grupo, descripcion, link`}</pre>
-            <p className="tiny muted" style={{ margin: '6px 0 12px' }}>
-              <b>tipo</b>: tp · tpi · entrega · parcial · recuperatorio · coloquio · final · cuestionario · otro<br />
-              <b>estado</b>: pendiente · en curso · entregado · aprobado · desaprobado<br />
-              <b>fecha</b>: 2026-11-20 o 20/11/2026 · <b>grupo</b>: mismo nombre para las etapas de un trabajo con varias entregas
-            </p>
-            <h3 style={{ fontSize: 15, marginBottom: 6 }}>📚 Materias</h3>
-            <pre className="code">{`materia, estado, nota, modalidad, periodo, requisitos`}</pre>
-            <p className="tiny muted" style={{ marginTop: 6 }}>
-              <b>estado</b>: pendiente · cursando · regular · aprobada · promocionada · equivalencia<br />
-              <b>modalidad</b> y <b>requisitos</b>: varios separados por <code>|</code> — ej. <code>entregas|coloquio</code>
+            <pre className="code">{COLUMNAS.join(',')}</pre>
+            <p className="tiny muted" style={{ margin: '8px 0 0' }}>
+              <b>materia</b>: nombre (“Programación III”, “prog 3”), abreviatura (“BD II”) o número del plan (“9”)<br />
+              <b>Filas de materia</b> — <b>estado</b>: pendiente · cursando · regular · aprobada · promocionada · equivalencia ·
+              <b> modalidad</b>: parciales · tpi · entregas · coloquio · final · promocion ·
+              <b> requisitos</b>: varios separados por <code>|</code><br />
+              <b>Filas de entrega</b> — <b>tipo</b>: tp · tpi · entrega · parcial · recuperatorio · coloquio · final · cuestionario · otro ·
+              <b> estado</b>: pendiente · en curso · entregado · aprobado · desaprobado ·
+              <b> fecha</b>: 2026-11-20 o 20/11/2026 · <b>grupo</b>: mismo nombre para las etapas de un mismo trabajo
             </p>
             <div className="row wrap" style={{ marginTop: 14 }}>
-              <button className="btn sm" onClick={() => descargar('plantilla-entregas.csv', PLANTILLA_ENTREGAS)}><Download size={14} /> Plantilla entregas</button>
-              <button className="btn sm" onClick={() => descargar('plantilla-materias.csv', PLANTILLA_MATERIAS)}><Download size={14} /> Plantilla materias</button>
+              <button className="btn sm" onClick={() => descargar('plantilla-tracker.csv', PLANTILLA)}><Download size={14} /> Descargar plantilla</button>
             </div>
           </div>
         </div>
@@ -165,8 +163,7 @@ export function DatosView() {
           <div className="card">
             <div className="card-head"><h2>Exportar</h2></div>
             <div className="stack">
-              <button className="btn" onClick={() => descargar(`entregas-${hoyISO()}.csv`, exportarEntregas(datos))}><Download size={16} /> Entregas (.csv) · {datos.items.length}</button>
-              <button className="btn" onClick={() => descargar(`materias-${hoyISO()}.csv`, exportarMaterias(datos))}><Download size={16} /> Materias (.csv)</button>
+              <button className="btn" onClick={() => descargar(`tracker-${hoyISO()}.csv`, exportarTodo(datos))}><Download size={16} /> Todo en un CSV · {datos.items.length} entregas</button>
             </div>
           </div>
           <div className="card">

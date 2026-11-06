@@ -1,4 +1,4 @@
-import { PLAN, materiaById } from '../data/plan';
+import { PLAN } from '../data/plan';
 import type { Datos, EstadoItem, EstadoMateria, Item, Modalidad, Requisito, TipoItem } from '../types';
 import { buscarMateria, norm, uid } from './logic';
 
@@ -99,7 +99,7 @@ const parseNota = (s: string) => {
 /* ---------- Importación ---------- */
 
 export interface ImportResult {
-  tipo: 'entregas' | 'materias' | 'desconocido';
+  tipo: 'entregas' | 'materias' | 'mixto' | 'desconocido';
   items: Item[];
   materias: Record<number, Partial<Datos['materias'][number]>>;
   requisitos: Requisito[];
@@ -132,9 +132,10 @@ export function importarCSV(text: string): ImportResult {
     res.errores.push('Falta la columna "materia".');
     return res;
   }
-  res.tipo = col('titulo') >= 0 ? 'entregas' : 'materias';
   const get = (r: string[], name: string) => (col(name) >= 0 ? (r[col(name)] ?? '').trim() : '');
 
+  // Cada fila se interpreta sola: si tiene título es una entrega; si no, es el estado de la materia.
+  // Así un único CSV puede traer materias y entregas mezcladas.
   rows.slice(1).forEach((r, idx) => {
     const fila = idx + 2;
     const mat = buscarMateria(get(r, 'materia'));
@@ -142,10 +143,13 @@ export function importarCSV(text: string): ImportResult {
       res.errores.push(`Fila ${fila}: no reconozco la materia "${get(r, 'materia')}".`);
       return;
     }
+    const titulo = get(r, 'titulo');
+    if (!titulo && (get(r, 'tipo') || get(r, 'fecha'))) {
+      res.errores.push(`Fila ${fila}: tiene tipo o fecha pero le falta el título.`);
+      return;
+    }
     res.filas++;
-    if (res.tipo === 'entregas') {
-      const titulo = get(r, 'titulo');
-      if (!titulo) { res.errores.push(`Fila ${fila}: falta el título.`); return; }
+    if (titulo) {
       const fecha = parseFecha(get(r, 'fecha'));
       if (fecha === null) res.errores.push(`Fila ${fila}: fecha "${get(r, 'fecha')}" no válida (usá AAAA-MM-DD o DD/MM/AAAA). Se importa sin fecha.`);
       const tipoRaw = norm(get(r, 'tipo'));
@@ -188,46 +192,40 @@ export function importarCSV(text: string): ImportResult {
         .forEach((texto) => res.requisitos.push({ id: uid(), materiaId: mat.id, texto, cumplido: false }));
     }
   });
+  const hayMaterias = Object.keys(res.materias).length > 0;
+  res.tipo = res.items.length && hayMaterias ? 'mixto' : res.items.length ? 'entregas' : hayMaterias ? 'materias' : 'desconocido';
   return res;
 }
 
 /* ---------- Plantillas y exportación ---------- */
 
-export const PLANTILLA_ENTREGAS = toCSV([
-  ['materia', 'tipo', 'titulo', 'fecha', 'estado', 'nota', 'grupo', 'descripcion', 'link'],
-  ['Programación III', 'entrega', 'Entrega 1 — Modelo de dominio', '2026-09-15', 'aprobado', '8', 'TPI Sistema de turnos', '', ''],
-  ['Programación III', 'entrega', 'Entrega 2 — API REST', '2026-10-20', 'entregado', '', 'TPI Sistema de turnos', '', ''],
-  ['Programación III', 'entrega', 'Entrega final + defensa', '2026-11-24', 'pendiente', '', 'TPI Sistema de turnos', 'Video de 10 min', ''],
-  ['Base de Datos II', 'tpi', 'TP Integrador', '2026-11-18', 'en curso', '', '', 'Grupal', ''],
-  ['Inglés II', 'coloquio', 'Coloquio oral', '2026-12-02', 'pendiente', '', '', '', ''],
+export const COLUMNAS = ['materia', 'titulo', 'tipo', 'fecha', 'estado', 'nota', 'grupo', 'descripcion', 'modalidad', 'requisitos', 'periodo', 'apuntes', 'link'];
+
+/** Plantilla única: filas sin título = estado de la materia; filas con título = entregas. */
+export const PLANTILLA = toCSV([
+  COLUMNAS,
+  ['Programación I', '', '', '', 'aprobada', '9', '', '', '', '', '2025-C1', '', ''],
+  ['Inglés I', '', '', '', 'equivalencia', '', '', '', '', '', '', '', ''],
+  ['Programación III', '', '', '', 'cursando', '', '', '', 'entregas|coloquio', '80% de actividades entregadas|Aprobar las 3 entregas con 6+', '2026-C2', 'Consultas los martes', ''],
+  ['Programación III', 'Entrega 1 — Modelo de dominio', 'entrega', '2026-09-15', 'aprobado', '8', 'TPI Sistema de turnos', '', '', '', '', '', ''],
+  ['Programación III', 'Entrega 2 — API REST', 'entrega', '2026-10-20', 'entregado', '', 'TPI Sistema de turnos', '', '', '', '', '', ''],
+  ['Programación III', 'Coloquio de defensa', 'coloquio', '2026-11-24', 'pendiente', '', 'TPI Sistema de turnos', 'Video de 10 min', '', '', '', '', ''],
 ]);
 
-export const PLANTILLA_MATERIAS = toCSV([
-  ['materia', 'estado', 'nota', 'modalidad', 'periodo', 'requisitos'],
-  ['Programación I', 'aprobada', '9', '', '2025-C1', ''],
-  ['Programación III', 'cursando', '', 'entregas|coloquio', '2026-C2', '80% de actividades entregadas|Aprobar las 3 entregas con 6+'],
-  ['Base de Datos II', 'cursando', '', 'tpi', '2026-C2', 'TPI aprobado con 6+'],
-  ['Inglés II', 'cursando', '', 'coloquio', '2026-C2', 'Cuestionarios completos'],
-]);
-
-export function exportarEntregas(d: Datos) {
-  return toCSV([
-    ['materia', 'tipo', 'titulo', 'fecha', 'estado', 'nota', 'grupo', 'descripcion', 'link'],
-    ...d.items.map((i) => [
-      materiaById(i.materiaId)?.nombre, i.tipo, i.titulo, i.fecha, i.estado, i.nota, i.grupo, i.descripcion, i.link,
-    ]),
-  ]);
-}
-
-export function exportarMaterias(d: Datos) {
-  return toCSV([
-    ['materia', 'estado', 'nota', 'modalidad', 'periodo', 'requisitos'],
-    ...PLAN.map((m) => {
-      const p = d.materias[m.id];
-      const reqs = d.requisitos.filter((r) => r.materiaId === m.id).map((r) => r.texto).join('|');
-      return [m.nombre, p?.estado ?? 'pendiente', p?.nota, p?.modalidad?.join('|'), p?.periodo, reqs];
-    }),
-  ]);
+/** Exporta todo en el mismo formato único que acepta la importación. */
+export function exportarTodo(d: Datos) {
+  const filas: unknown[][] = [COLUMNAS];
+  for (const m of PLAN) {
+    const p = d.materias[m.id];
+    const reqs = d.requisitos.filter((r) => r.materiaId === m.id).map((r) => r.texto).join('|');
+    if (p && p.estado !== 'pendiente') {
+      filas.push([m.nombre, '', '', '', p.estado, p.nota, '', '', p.modalidad.join('|'), reqs, p.periodo, p.apuntes, '']);
+    }
+    for (const i of d.items.filter((x) => x.materiaId === m.id)) {
+      filas.push([m.nombre, i.titulo, i.tipo, i.fecha, i.estado, i.nota, i.grupo, i.descripcion, '', '', '', '', i.link]);
+    }
+  }
+  return toCSV(filas);
 }
 
 export function descargar(nombre: string, contenido: string, mime = 'text/csv;charset=utf-8') {
