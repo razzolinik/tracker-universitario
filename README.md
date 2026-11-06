@@ -20,19 +20,28 @@ npm run build    # genera dist/ para subir a Vercel, Netlify, GitHub Pages…
 
 ## Formato CSV
 
-Se acepta `,` o `;` como separador (Excel en español usa `;`). La columna `materia` acepta
-nombre completo, abreviatura (`prog 3`, `BD II`) o número del plan (`9`).
+Un solo archivo con todo. Cada fila es **una materia o una entrega**:
+si la columna `titulo` está vacía, la fila carga el estado de la materia; si tiene título, es una entrega.
+Se acepta `,` o `;` como separador (Excel en español usa `;`), las columnas pueden ir en cualquier orden
+y las que no se usan pueden faltar.
 
-**Entregas** — `materia, tipo, titulo, fecha, estado, nota, grupo, descripcion, link`
+```
+materia,titulo,tipo,fecha,estado,nota,grupo,descripcion,modalidad,requisitos,periodo,apuntes,link
+```
+
+- `materia`: nombre completo, abreviatura (`prog 3`, `BD II`) o número del plan (`9`).
+
+**Filas de materia** (sin `titulo`)
+
+- `estado`: pendiente, cursando, regular, aprobada, promocionada, equivalencia
+- `modalidad`: parciales, tpi, entregas, coloquio, final, promocion (varios separados por `|`)
+- `requisitos`: varios separados por `|`
+
+**Filas de entrega** (con `titulo`)
 
 - `tipo`: tp, tpi, entrega, parcial, recuperatorio, coloquio, final, cuestionario, otro
 - `estado`: pendiente, en curso, entregado, aprobado, desaprobado
 - `fecha`: `2026-11-20` o `20/11/2026` (o `20/11`, se asume el año actual)
 - `grupo`: mismo texto en varias filas = un trabajo con varias entregas (se muestra con barra de etapas)
 
-**Materias** — `materia, estado, nota, modalidad, periodo, requisitos`
-
-- `estado`: pendiente, cursando, regular, aprobada, promocionada, equivalencia
-- `modalidad` y `requisitos`: varios valores separados por `|`
-
-Las plantillas se descargan desde la pantalla **Datos**.
+La plantilla se descarga desde la pantalla **Datos**, y **Exportar** genera un archivo en este mismo formato.
