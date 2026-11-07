@@ -6,6 +6,7 @@ import { Calendario } from './views/Calendario';
 import { Plan } from './views/Plan';
 import { DatosView } from './views/DatosView';
 import { ItemForm, type ItemDraft } from './components/ItemForm';
+import { MateriaModal } from './components/MateriaModal';
 import { Toaster } from './components/ui';
 import { useStore } from './store';
 import { diasHasta, itemHecho } from './lib/logic';
@@ -42,6 +43,8 @@ export default function App() {
   const [vista, setVista] = useState<Vista>(leerVista);
   const [materiaSel, setMateriaSel] = useState<number>();
   const [draft, setDraft] = useState<ItemDraft | null>(null);
+  const [ficha, setFicha] = useState<{ id: number; tab?: 'eval' | 'aprobar' | 'apuntes' } | null>(null);
+  const abrirFicha = (id: number, tab?: 'eval' | 'aprobar' | 'apuntes') => setFicha({ id, tab });
   const [tema, setTema] = useState(() => document.documentElement.dataset.theme ?? 'bosque');
   useEffect(() => {
     document.documentElement.dataset.theme = tema;
@@ -95,9 +98,9 @@ export default function App() {
           <ThemePicker tema={tema} setTema={setTema} />
         </div>
         {vista === 'inicio' && <Inicio onOpenItem={setDraft} onOpenMateria={abrirMateria} irA={irA} />}
-        {vista === 'cursada' && <Cursada materiaId={materiaSel} setMateriaId={setMateriaSel} onOpenItem={setDraft} irA={irA} />}
+        {vista === 'cursada' && <Cursada materiaId={materiaSel} setMateriaId={setMateriaSel} onOpenItem={setDraft} onFicha={abrirFicha} irA={irA} />}
         {vista === 'calendario' && <Calendario onOpenItem={setDraft} />}
-        {vista === 'plan' && <Plan onOpenMateria={abrirMateria} />}
+        {vista === 'plan' && <Plan onFicha={abrirFicha} />}
         {vista === 'datos' && <DatosView />}
       </main>
 
@@ -109,6 +112,7 @@ export default function App() {
         ))}
       </nav>
 
+      {ficha && <MateriaModal key={ficha.id} id={ficha.id} tabInicial={ficha.tab} onClose={() => setFicha(null)} />}
       {draft && <ItemForm inicial={draft} onClose={() => setDraft(null)} />}
       <Toaster />
     </div>

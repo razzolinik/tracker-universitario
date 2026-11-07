@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { ESTADOS_ITEM, PLAN, TIPOS_ITEM } from '../data/plan';
+import { ESTADOS_ITEM, PLAN, TIPOS_ITEM, tipoInfo } from '../data/plan';
 import { prog } from '../lib/logic';
 import { useStore } from '../store';
 import type { Item } from '../types';
@@ -22,6 +22,8 @@ export function ItemForm({ inicial, onClose }: { inicial: ItemDraft; onClose: ()
   });
   const set = <K extends keyof Item>(k: K, v: Item[K] | undefined) => setF((x) => ({ ...x, [k]: v }));
   const grupos = [...new Set(datos.items.filter((i) => i.materiaId === f.materiaId && i.grupo).map((i) => i.grupo!))];
+  const candidatos = datos.items.filter((i) => i.materiaId === f.materiaId && i.id !== f.id && i.tipo !== 'recuperatorio');
+  const esRecu = f.tipo === 'recuperatorio' || f.opcional || !!f.recuperaA;
 
   const guardar = () => {
     if (!f.titulo?.trim() || !f.materiaId) return;
@@ -45,19 +47,41 @@ export function ItemForm({ inicial, onClose }: { inicial: ItemDraft; onClose: ()
         </label>
         <label className="field">
           <span>Tipo</span>
-          <select className="select" value={f.tipo} onChange={(e) => set('tipo', e.target.value as Item['tipo'])}>
+          <select className="select" value={f.tipo} onChange={(e) => {
+            const tipo = e.target.value as Item['tipo'];
+            setF((x) => ({ ...x, tipo, opcional: tipo === 'recuperatorio' ? true : x.opcional }));
+          }}>
             {TIPOS_ITEM.map((t) => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
           </select>
         </label>
         <label className="field">
-          <span>Fecha</span>
+          <span>Fecha <span className="tiny">(límite o día del examen)</span></span>
           <input className="input" type="date" value={f.fecha ?? ''} onChange={(e) => set('fecha', e.target.value || undefined)} />
+        </label>
+        <label className="field">
+          <span>Abre <span className="tiny">(si tiene ventana)</span></span>
+          <input className="input" type="date" value={f.desde ?? ''} onChange={(e) => set('desde', e.target.value || undefined)} />
         </label>
         <label className="field">
           <span>Estado</span>
           <select className="select" value={f.estado} onChange={(e) => set('estado', e.target.value as Item['estado'])}>
             {ESTADOS_ITEM.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
+        </label>
+        {esRecu && (
+          <label className="field">
+            <span>Recupera a</span>
+            <select className="select" value={f.recuperaA ?? ''} onChange={(e) => set('recuperaA', e.target.value || undefined)}>
+              <option value="">— ninguna —</option>
+              {candidatos.map((c) => <option key={c.id} value={c.id}>{tipoInfo(c.tipo).emoji} {c.titulo}</option>)}
+            </select>
+          </label>
+        )}
+        <label className="field" style={{ justifyContent: 'flex-end' }}>
+          <span className="row" style={{ gap: 8, color: 'var(--text)', cursor: 'pointer', padding: '9px 0' }}>
+            <input type="checkbox" checked={!!f.opcional} onChange={(e) => set('opcional', e.target.checked || undefined)} />
+            Opcional (solo si hace falta)
+          </span>
         </label>
         <label className="field">
           <span>Grupo / proyecto <span className="tiny">(para entregas en etapas)</span></span>
