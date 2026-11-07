@@ -1,8 +1,11 @@
-import { AlertTriangle, CalendarClock, GraduationCap, Plus, Sparkles, Star, BookOpen } from 'lucide-react';
-import { PLAN, labelModalidad, materiaById } from '../data/plan';
+import { useState } from 'react';
+import { AlertTriangle, CalendarClock, CalendarRange, GraduationCap, Pencil, Plus, Sparkles, Star, BookOpen } from 'lucide-react';
+import { PLAN, materiaById } from '../data/plan';
 import {
-  avanceMateria, diasHasta, disponibilidadTFI, fechaCorta, itemHecho, parseISO, prog, resumenCarrera, textoRelativo,
+  avanceMateria, cuatriInfo, cuenta, diaSemana, enRadar, diasHasta, disponibilidadTFI, fechaCorta, parseISO, porHacer, resumenCarrera,
+  resumenEvaluaciones, textoRelativo,
 } from '../lib/logic';
+import { CuatriForm } from '../components/CuatriForm';
 import { datosEjemplo, useStore } from '../store';
 import type { Item } from '../types';
 import { Bar, ItemRow, MateriaChip, Ring, hueStyle, toast } from '../components/ui';
@@ -23,14 +26,19 @@ export function Inicio({ onOpenItem, onOpenMateria, irA }: Props) {
   const r = resumenCarrera(datos);
   const tfi = disponibilidadTFI(datos);
   const cursandoIds = new Set(r.cursando.map((m) => m.id));
+  const c = cuatriInfo(datos);
+  const [editCuatri, setEditCuatri] = useState(false);
 
-  const pendientes = datos.items.filter((i) => !itemHecho(i) && i.estado !== 'desaprobado' && i.fecha);
-  const vencidas = pendientes.filter((i) => diasHasta(i.fecha!) < 0).sort((a, b) => (a.fecha! < b.fecha! ? -1 : 1));
+  // Los recuperatorios "por si acaso" aparecen recién cuando ya pasó lo que recuperan, y nunca como atrasados.
+  const pendientes = datos.items.filter((i) => porHacer(datos, i) && enRadar(datos, i) && i.fecha);
+  const vencidas = pendientes.filter((i) => cuenta(datos, i) && diasHasta(i.fecha!) < 0).sort((a, b) => (a.fecha! < b.fecha! ? -1 : 1));
   const proximas = pendientes
     .filter((i) => diasHasta(i.fecha!) >= 0 && diasHasta(i.fecha!) <= 21)
     .sort((a, b) => (a.fecha! < b.fecha! ? -1 : 1));
-  const proxima = proximas[0];
-  const semana = proximas.filter((i) => diasHasta(i.fecha!) <= 7).length;
+  const obligatorias = proximas.filter((i) => cuenta(datos, i));
+  const proxima = obligatorias[0];
+  const semana = obligatorias.filter((i) => diasHasta(i.fecha!) <= 7).length;
+  const mostrarProximo = r.disponibles.length > 0 && (!c || c.cierre || r.cursando.length === 0);
 
   const porDia = proximas.reduce<Record<string, Item[]>>((acc, i) => {
     (acc[i.fecha!] ??= []).push(i);
@@ -129,6 +137,7 @@ export function Inicio({ onOpenItem, onOpenMateria, irA }: Props) {
                 return (
                   <div className="tl-day" key={fecha}>
                     <div className="tl-date">
+                      <div className="m">{diaSemana(fecha)}</div>
                       <div className="d">{d.getDate()}</div>
                       <div className="m">{fechaCorta(fecha).split(' ')[1]}</div>
                       <div className="tiny muted">{textoRelativo(fecha)}</div>
@@ -143,6 +152,40 @@ export function Inicio({ onOpenItem, onOpenMateria, irA }: Props) {
 
         <div className="stack">
           <div className="card">
+            <div className="card-head">
+              <h3 className="row" style={{ gap: 8 }}><CalendarRange size={17} /> {c?.nombre ?? 'Cuatrimestre'}</h3>
+              <button className="btn ghost sm" onClick={() => setEditCuatri(true)}><Pencil size={13} /> Fechas</button>
+            </div>
+            {!c ? (
+              <p className="tiny muted">Cargá cuándo empieza y termina el cuatrimestre para ver cuánto falta.</p>
+            ) : (
+              <>
+                {c.pct !== undefined && <Bar pct={c.pct} />}
+                <div className="cuatri-fechas">
+                  {c.inicio && <div><span className="tiny muted">Empezó</span><b>{fechaCorta(c.inicio)}</b></div>}
+                  {c.fin && (
+                    <div>
+                      <span className="tiny muted">{c.terminado ? 'Terminó' : 'Termina'}{c.finEstimado ? ' (aprox.)' : ''}</span>
+                      <b>{diaSemana(c.fin)} {fechaCorta(c.fin)}</b>
+                    </div>
+                  )}
+                  {c.semana !== undefined && !c.terminado && <div><span className="tiny muted">Semana</span><b>{c.semana} de {c.semanas}</b></div>}
+                </div>
+                <p className="tiny muted" style={{ marginTop: 8 }}>
+                  {c.terminado ? 'La cursada ya terminó. Actualizá el estado de tus materias en el Plan.' : c.diasFin === 0 ? 'Hoy termina la cursada.' : c.diasFin !== undefined ? `Quedan ${c.diasFin < 14 ? `${c.diasFin} ${c.diasFin === 1 ? 'día' : 'días'}` : `${Math.round(c.diasFin / 7)} semanas`} de cursada.` : ''}
+                  {c.finEstimado && ' El fin sale de tu última fecha cargada: tocá Fechas para poner el real.'}
+                </p>
+                {(c.inscripcion || c.proximo) && (
+                  <div className="cuatri-fechas" style={{ marginTop: 10 }}>
+                    {c.inscripcion && <div><span className="tiny muted">Inscripción al próximo</span><b>{fechaCorta(c.inscripcion)}</b></div>}
+                    {c.proximo && <div><span className="tiny muted">Arranca el próximo</span><b>{fechaCorta(c.proximo)}</b></div>}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="card">
             <div className="card-head"><h2>Cursando</h2></div>
             {r.cursando.length === 0 ? (
               <div className="empty small">No marcaste materias como “cursando” todavía.<br />
@@ -152,15 +195,14 @@ export function Inicio({ onOpenItem, onOpenMateria, irA }: Props) {
               <div className="stack" style={{ gap: 14 }}>
                 {r.cursando.map((m) => {
                   const a = avanceMateria(datos, m.id);
-                  const p = prog(datos, m.id);
+                  const resumen = resumenEvaluaciones(a.items);
                   return (
                     <button key={m.id} className="row" style={{ ...hueStyle(m.hue), background: 'none', border: 0, padding: 0, cursor: 'pointer', textAlign: 'left' }} onClick={() => onOpenMateria(m.id)}>
                       <Ring pct={a.pct} size={46} stroke={4} color={`hsl(${m.hue} 55% 60%)`} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600 }}>{m.nombre}</div>
                         <div className="tiny muted">
-                          {p.modalidad.length ? p.modalidad.map(labelModalidad).join(' · ') : 'Sin modalidad cargada'}
-                          {a.proximo && <> · próx. <span className="mono">{fechaCorta(a.proximo.fecha!)}</span></>}
+                          {a.proximo ? <>Próximo: {a.proximo.titulo} · <span className="mono">{diaSemana(a.proximo.fecha!)} {fechaCorta(a.proximo.fecha!)}</span></> : resumen || 'Sin evaluaciones cargadas'}
                         </div>
                       </div>
                     </button>
@@ -170,9 +212,12 @@ export function Inicio({ onOpenItem, onOpenMateria, irA }: Props) {
             )}
           </div>
 
-          {r.disponibles.length > 0 && (
+          {mostrarProximo && (
             <div className="card">
-              <div className="card-head"><h3>Podés cursar</h3><span className="pill">{r.disponibles.length}</span></div>
+              <div className="card-head"><h3>Para el próximo cuatrimestre</h3><span className="pill">{r.disponibles.length}</span></div>
+              <p className="tiny muted" style={{ marginBottom: 8 }}>
+                Con lo que tenés aprobado ya podés anotarte en:{c?.inscripcion ? ` (inscripción: ${fechaCorta(c.inscripcion)})` : ''}
+              </p>
               <div className="row wrap" style={{ gap: 6 }}>
                 {r.disponibles.filter((m) => !cursandoIds.has(m.id)).map((m) => <MateriaChip key={m.id} id={m.id} corto={false} />)}
               </div>
@@ -189,6 +234,7 @@ export function Inicio({ onOpenItem, onOpenMateria, irA }: Props) {
           </div>
         </div>
       </div>
+      {editCuatri && <CuatriForm onClose={() => setEditCuatri(false)} />}
     </div>
   );
 }
