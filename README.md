@@ -12,21 +12,25 @@ npm run build    # genera dist/ para subir a Vercel, Netlify, GitHub Pages…
 
 ## Pantallas
 
-- **Inicio**: avance de la carrera, promedio, próxima entrega, atrasadas, lo que viene en 3 semanas y camino al TFI.
-- **Cursada**: por materia, cómo se aprueba (parciales, TPI, entregas, coloquio, final, promoción), checklist de requisitos, entregas agrupadas por proyecto con barra de etapas y apuntes.
+- **Inicio**: avance de la carrera, promedio, próxima entrega, atrasadas, lo que viene en 3 semanas, fechas del cuatrimestre y camino al TFI. Las materias que podés cursar después aparecen recién cuando faltan 3 semanas para el cierre o se acerca la inscripción.
+- **Cursada**: por materia, cronograma ordenado por fecha (con marca de hoy y lo ya hecho plegado), cómo vas, notas parciales, condiciones y apuntes.
+- **Ventana de materia** (botón *Editar materia* o tocando una materia en el Plan): estado, nota final, y evaluaciones que se agregan con un toque (+ Parcial, + TP, + Recuperatorio…), se editan en la misma fila y se borran con confirmación.
 - **Calendario**: vista mensual + exportación `.ics` para Google Calendar.
-- **Plan**: estado de las 17 materias, correlativas calculadas, TFI y notas finales. Por defecto oculta las aprobadas.
+- **Plan**: Trabajo Final y notas finales arriba; debajo las 17 materias con sus correlativas.
 - **Datos**: importar CSV, exportar, respaldo/restauración.
+
+## Recuperatorios
+
+Son opcionales: no cuentan para el avance ni aparecen como atrasados. Si se vinculan a la evaluación que recuperan,
+desaparecen cuando esa evaluación sale aprobada y pasan a ser obligatorios si sale desaprobada.
 
 ## Formato CSV
 
-Un solo archivo con todo. Cada fila es **una materia o una entrega**:
-si la columna `titulo` está vacía, la fila carga el estado de la materia; si tiene título, es una entrega.
-Se acepta `,` o `;` como separador (Excel en español usa `;`), las columnas pueden ir en cualquier orden
-y las que no se usan pueden faltar.
+Un solo archivo con todo. Se acepta `,` o `;` como separador (Excel en español usa `;`), las columnas pueden ir
+en cualquier orden y las que no se usan pueden faltar.
 
 ```
-materia,titulo,tipo,fecha,estado,nota,grupo,descripcion,modalidad,requisitos,periodo,apuntes,link
+materia,titulo,tipo,desde,fecha,estado,nota,recupera,opcional,grupo,descripcion,modalidad,requisitos,periodo,apuntes,link
 ```
 
 - `materia`: nombre completo, abreviatura (`prog 3`, `BD II`) o número del plan (`9`).
@@ -34,14 +38,19 @@ materia,titulo,tipo,fecha,estado,nota,grupo,descripcion,modalidad,requisitos,per
 **Filas de materia** (sin `titulo`)
 
 - `estado`: pendiente, cursando, regular, aprobada, promocionada, equivalencia
-- `modalidad`: parciales, tpi, entregas, coloquio, final, promocion (varios separados por `|`)
-- `requisitos`: varios separados por `|`
+- `nota`: nota final · `requisitos`: condiciones extra separadas por `|` · `apuntes`: un renglón por idea · `link`: aula del campus
+- `modalidad` (opcional): parciales, tpi, entregas, coloquio, final, promocion (varios separados por `|`)
 
-**Filas de entrega** (con `titulo`)
+**Filas de evaluación** (con `titulo`)
 
-- `tipo`: tp, tpi, entrega, parcial, recuperatorio, coloquio, final, cuestionario, otro
+- `tipo`: parcial, tp, tpi, entrega, cuestionario, coloquio, recuperatorio, final, otro
 - `estado`: pendiente, en curso, entregado, aprobado, desaprobado
-- `fecha`: `2026-11-20` o `20/11/2026` (o `20/11`, se asume el año actual)
+- `fecha`: límite o día del examen (`2026-11-20`, `20/11/2026` o `20/11`) · `desde`: cuándo abre, para ventanas de entrega
+- `recupera`: título de la evaluación que recupera (`Parcial 2`) · `opcional`: `no` para que un recuperatorio cuente siempre
 - `grupo`: mismo texto en varias filas = un trabajo con varias entregas (se muestra con barra de etapas)
+
+**Filas del cuatrimestre**
+
+- `materia` = `cuatrimestre`, `titulo` = `inicio`, `fin`, `inscripcion` o `proximo`, con su `fecha`. El nombre va en `periodo`.
 
 La plantilla se descarga desde la pantalla **Datos**, y **Exportar** genera un archivo en este mismo formato.
