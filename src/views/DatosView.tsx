@@ -4,9 +4,15 @@ import { materiaById, tipoInfo } from '../data/plan';
 import {
   COLUMNAS, PLANTILLA, descargar, exportarTodo, importarCSV, type ImportResult,
 } from '../lib/csv';
-import { fechaCorta, hoyISO } from '../lib/logic';
+import { fechaCorta, hoyISO, rangoFechas } from '../lib/logic';
 import { VACIO, datosEjemplo, useStore } from '../store';
 import { MateriaChip, toast } from '../components/ui';
+
+const EJEMPLO_PEGAR = [
+  'materia,titulo,tipo,fecha,estado,recupera',
+  'Programación III,Parcial 2,parcial,2026-11-12,pendiente,',
+  'Programación III,Recuperatorio Parcial 2,recuperatorio,2026-11-26,pendiente,Parcial 2',
+].join('\n');
 
 export function DatosView() {
   const { datos, aplicarImport, reemplazarTodo } = useStore();
@@ -37,7 +43,7 @@ export function DatosView() {
   const confirmar = () => {
     if (!res) return;
     aplicarImport(res, modo);
-    toast(`Importado: ${res.items.length || Object.keys(res.materias).length} filas ✓`);
+    toast(`Importado: ${res.filas} filas ✓`);
     setRes(null);
     setPegado('');
   };
@@ -61,13 +67,13 @@ export function DatosView() {
             >
               <FileUp size={30} color="var(--accent)" />
               <p style={{ marginTop: 8, fontWeight: 600 }}>Arrastrá un .csv acá o hacé clic</p>
-              <p className="tiny muted">Detecto solo si es de entregas o de materias. Acepta coma o punto y coma.</p>
+              <p className="tiny muted">Un solo archivo con materias, evaluaciones y fechas del cuatrimestre. Acepta coma o punto y coma.</p>
               <input ref={fileRef} type="file" accept=".csv,.txt,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) leer(f); e.target.value = ''; }} />
             </div>
             <details style={{ marginTop: 12 }}>
               <summary className="small" style={{ cursor: 'pointer' }}><ClipboardPaste size={14} style={{ verticalAlign: -2 }} /> O pegá el texto directamente</summary>
               <textarea className="textarea" style={{ marginTop: 8, fontFamily: 'monospace', fontSize: 12 }} value={pegado} onChange={(e) => setPegado(e.target.value)}
-                placeholder={'materia,tipo,titulo,fecha,estado\nProgramación III,entrega,Entrega 1,2026-11-20,pendiente'} />
+                placeholder={EJEMPLO_PEGAR} />
               <button className="btn sm" style={{ marginTop: 8 }} disabled={!pegado.trim()} onClick={() => setRes(importarCSV(pegado))}>Previsualizar</button>
             </details>
           </div>
@@ -75,11 +81,19 @@ export function DatosView() {
           {res && (
             <div className="card fade-in">
               <div className="card-head">
-                <h3>Vista previa · {Object.keys(res.materias).length} materias · {res.items.length} entregas</h3>
+                <h3>Vista previa · {Object.keys(res.materias).length} materias · {res.items.length} evaluaciones</h3>
                 <span className="pill">{res.filas} filas</span>
               </div>
               {res.errores.length > 0 && (
                 <div className="err-list" style={{ marginBottom: 12 }}>{res.errores.map((e, i) => <div key={i}>⚠ {e}</div>)}</div>
+              )}
+              {res.cuatri && (
+                <p className="small" style={{ marginBottom: 10 }}>
+                  🗓️ <b>{res.cuatri.nombre ?? 'Cuatrimestre'}</b>
+                  {res.cuatri.inicio && <> · empieza {fechaCorta(res.cuatri.inicio)}</>}
+                  {res.cuatri.fin && <> · termina {fechaCorta(res.cuatri.fin)}</>}
+                  {res.cuatri.inscripcion && <> · inscripción {fechaCorta(res.cuatri.inscripcion)}</>}
+                </p>
               )}
               {res.items.length > 0 && (
                 <div className="tbl-wrap" style={{ maxHeight: 280, overflow: 'auto' }}>
@@ -89,8 +103,8 @@ export function DatosView() {
                       {res.items.map((i) => (
                         <tr key={i.id}>
                           <td><MateriaChip id={i.materiaId} /></td>
-                          <td>{tipoInfo(i.tipo).emoji} {i.titulo}</td>
-                          <td className="mono">{i.fecha ? fechaCorta(i.fecha) : '—'}</td>
+                          <td>{tipoInfo(i.tipo).emoji} {i.titulo}{i.opcional && <span className="tag tag-opt" style={{ marginLeft: 6 }}>opcional</span>}</td>
+                          <td className="mono" style={{ whiteSpace: 'nowrap' }}>{i.fecha ? rangoFechas(i.desde, i.fecha) : '—'}</td>
                           <td className="muted">{i.grupo ?? ''}</td>
                         </tr>
                       ))}
@@ -101,14 +115,13 @@ export function DatosView() {
               {Object.keys(res.materias).length > 0 && (
                 <div className="tbl-wrap" style={{ maxHeight: 280, overflow: 'auto' }}>
                   <table className="tbl">
-                    <thead><tr><th>Materia</th><th>Estado</th><th>Nota</th><th>Modalidad</th><th>Req.</th></tr></thead>
+                    <thead><tr><th>Materia</th><th>Estado</th><th>Nota</th><th>Cond.</th></tr></thead>
                     <tbody>
                       {Object.entries(res.materias).map(([id, p]) => (
                         <tr key={id}>
                           <td>{materiaById(Number(id))?.nombre}</td>
                           <td>{p.estado ?? '—'}</td>
                           <td>{p.nota ?? ''}</td>
-                          <td className="muted">{p.modalidad?.join(', ')}</td>
                           <td>{res.requisitos.filter((r) => r.materiaId === Number(id)).length || ''}</td>
                         </tr>
                       ))}
@@ -124,7 +137,7 @@ export function DatosView() {
                       <button className={modo === 'reemplazar' ? 'on' : ''} onClick={() => setModo('reemplazar')}>Reemplazar esas materias</button>
                     </div>
                     <p className="tiny muted" style={{ marginTop: 4 }}>
-                      {modo === 'agregar' ? 'Suma las filas nuevas y saltea las que ya tenés (mismo título en la misma materia).' : 'Borra las entregas/requisitos actuales de las materias del archivo y deja las del CSV.'}
+                      {modo === 'agregar' ? 'Suma las filas nuevas y saltea las que ya tenés (mismo título en la misma materia).' : 'Borra las evaluaciones y condiciones actuales de las materias del archivo y deja las del CSV.'}
                     </p>
                   </div>
                   <div className="row">
@@ -139,20 +152,16 @@ export function DatosView() {
           <div className="card">
             <div className="card-head"><h2>Formato</h2></div>
             <p className="small muted" style={{ marginBottom: 10 }}>
-              Un solo archivo con todo. Cada fila es una materia <b>o</b> una entrega:
-              si la columna <b>titulo</b> está vacía, la fila carga el estado de la materia; si tiene título, es una entrega.
-              Las columnas pueden ir en cualquier orden y las que no uses pueden faltar.
+              Un solo archivo con todo. Las columnas pueden ir en cualquier orden y las que no uses pueden faltar.
             </p>
             <pre className="code">{COLUMNAS.join(',')}</pre>
-            <p className="tiny muted" style={{ margin: '8px 0 0' }}>
-              <b>materia</b>: nombre (“Programación III”, “prog 3”), abreviatura (“BD II”) o número del plan (“9”)<br />
-              <b>Filas de materia</b> — <b>estado</b>: pendiente · cursando · regular · aprobada · promocionada · equivalencia ·
-              <b> modalidad</b>: parciales · tpi · entregas · coloquio · final · promocion ·
-              <b> requisitos</b>: varios separados por <code>|</code><br />
-              <b>Filas de entrega</b> — <b>tipo</b>: tp · tpi · entrega · parcial · recuperatorio · coloquio · final · cuestionario · otro ·
-              <b> estado</b>: pendiente · en curso · entregado · aprobado · desaprobado ·
-              <b> fecha</b>: 2026-11-20 o 20/11/2026 · <b>grupo</b>: mismo nombre para las etapas de un mismo trabajo
-            </p>
+            <div className="formato">
+              <div><b>Materia</b> (fila sin <code>titulo</code>): <code>estado</code> pendiente · cursando · regular · aprobada · promocionada · equivalencia; <code>nota</code> final; <code>requisitos</code> separados por <code>|</code>; <code>apuntes</code>; <code>link</code> del aula.</div>
+              <div><b>Evaluación</b> (fila con <code>titulo</code>): <code>tipo</code> parcial · tp · tpi · entrega · cuestionario · coloquio · recuperatorio · final · otro; <code>estado</code> pendiente · en curso · entregado · aprobado · desaprobado; <code>desde</code> + <code>fecha</code> para ventanas (abre el 2, cierra el 12); <code>grupo</code> para las etapas de un mismo trabajo.</div>
+              <div><b>Recuperatorios</b>: con <code>tipo</code> recuperatorio ya son opcionales. En <code>recupera</code> va el título de la evaluación (“Parcial 2”): si sale aprobada, el recuperatorio deja de aparecer en los avisos; si sale desaprobada, pasa a ser obligatorio. Poné <code>opcional</code> = no para que cuente siempre.</div>
+              <div><b>Cuatrimestre</b>: <code>materia</code> = cuatrimestre, <code>titulo</code> = inicio · fin · inscripcion · proximo, con su <code>fecha</code>. El nombre va en <code>periodo</code>.</div>
+              <div><code>materia</code> acepta el nombre (“Programación III”, “prog 3”), la abreviatura (“BD II”) o el número del plan (“9”). Fechas: 2026-11-20, 20/11/2026 o 20/11.</div>
+            </div>
             <div className="row wrap" style={{ marginTop: 14 }}>
               <button className="btn sm" onClick={() => descargar('plantilla-tracker.csv', PLANTILLA)}><Download size={14} /> Descargar plantilla</button>
             </div>
@@ -163,7 +172,7 @@ export function DatosView() {
           <div className="card">
             <div className="card-head"><h2>Exportar</h2></div>
             <div className="stack">
-              <button className="btn" onClick={() => descargar(`tracker-${hoyISO()}.csv`, exportarTodo(datos))}><Download size={16} /> Todo en un CSV · {datos.items.length} entregas</button>
+              <button className="btn" onClick={() => descargar(`tracker-${hoyISO()}.csv`, exportarTodo(datos))}><Download size={16} /> Todo en un CSV · {datos.items.length} evaluaciones</button>
             </div>
           </div>
           <div className="card">
