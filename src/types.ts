@@ -44,6 +44,7 @@ export interface MateriaProgreso {
   modalidad: Modalidad[];
   periodo?: string;
   apuntes?: string;
+  link?: string; // aula del campus
 }
 
 export interface Item {
@@ -51,12 +52,25 @@ export interface Item {
   materiaId: number;
   tipo: TipoItem;
   titulo: string;
-  fecha?: string; // YYYY-MM-DD
+  fecha?: string; // YYYY-MM-DD · fecha límite / día del examen
+  desde?: string; // YYYY-MM-DD · cuando abre (para ventanas "del 2 al 12/11")
   estado: EstadoItem;
   nota?: number;
   grupo?: string;
   descripcion?: string;
   link?: string;
+  /** Solo hace falta si sale mal otra evaluación (típico de los recuperatorios). */
+  opcional?: boolean;
+  /** id de la evaluación que recupera. */
+  recuperaA?: string;
+}
+
+export interface Cuatrimestre {
+  nombre?: string; // "2º cuatrimestre 2026"
+  inicio?: string;
+  fin?: string;
+  inscripcion?: string; // inscripción al próximo
+  proximo?: string; // arranca el próximo
 }
 
 export interface Requisito {
@@ -71,4 +85,5 @@ export interface Datos {
   materias: Record<number, MateriaProgreso>;
   items: Item[];
   requisitos: Requisito[];
+  cuatri?: Cuatrimestre;
 }
