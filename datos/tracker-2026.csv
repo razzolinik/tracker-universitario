@@ -1,34 +1,57 @@
-﻿materia,titulo,tipo,fecha,estado,nota,grupo,descripcion,modalidad,requisitos,periodo,apuntes
-Programación I,,,,equivalencia,,,,,,,
-Programación II,,,,equivalencia,,,,,,,
-Base de Datos I,,,,equivalencia,,,,,,,
-Inglés I,,,,equivalencia,,,,,,,
-Arquitectura y Sistemas Operativos,,,,aprobada,8,,,,,2026-C1,
-Matemática,,,,aprobada,10,,,,,2026-C1,
-Organización Empresarial,,,,aprobada,10,,,,,2026-C1,
-Base de Datos II,,,,cursando,,,,parciales|tpi|coloquio,Tener completadas todas las unidades previas a cada parcial|Entregar los TPs con anticipación para que los corrijan a tiempo,2026-C2,"Campus: https://tup.sied.utn.edu.ar/course/view.php?id=83 · TPI: Grupo 038, tutora Aldana Iramaz. Coloquio virtual (enlace Unirse en la sección TPI). La recuperación del TPI (cierra 8/11) no aplica porque la 1ª instancia quedó aprobada."
-Base de Datos II,Parcial 1,parcial,2026-09-11,aprobado,9.5,,08:00 a 23:00,,,,
-Base de Datos II,Parcial 2,parcial,2026-10-16,aprobado,9,,08:00 a 23:00,,,,
-Base de Datos II,Globalizador,final,2026-11-13,pendiente,,,"08:00 a 23:00. Al 2/11 no estaba publicado; la fecha sale de la tabla de evaluaciones.",,,,
-Base de Datos II,Elección de grupo,entrega,2026-10-11,entregado,,TPI BD II,Grupo 038,,,,
-Base de Datos II,TPI — Entrega 1ª instancia,tpi,2026-10-31,aprobado,,TPI BD II,,,,,
-Base de Datos II,Coloquio del TPI (15:30),coloquio,2026-11-04,pendiente,,TPI BD II,La fecha ya pasó: confirmá el resultado en el campus y marcalo.,,,,
-Programación III,,,,cursando,,,,parciales|tpi,Entrega de código del 2º parcial aprobada (habilita el cuestionario)|Entrega de código: un único .zip con el link del video en los comentarios,2026-C2,"Campus: https://tup.sied.utn.edu.ar/course/view.php?id=82 · Notas sobre 100. Recuperatorio del 2º parcial: código del 16 al 26/11, cuestionario el 28/11 (09:00 o 18:00)."
-Programación III,Parcial 1 (entrega),parcial,2026-09-19,aprobado,98,,Ventana del 7 al 19/9,,,,
-Programación III,Parcial 2 — Entrega de código,entrega,2026-11-12,pendiente,,Parcial 2,"Abre 2/11, cierra 23:59. Un único .zip con el link del video en los comentarios. Recuperatorio: 16 al 26/11.",,,,
-Programación III,Parcial 2 — Cuestionario por Zoom,cuestionario,2026-11-14,pendiente,,Parcial 2,"Turnos 09:00 o 18:00, con pregunta conceptual. Requiere la entrega de código aprobada. Recuperatorio: 28/11.",,,,
-Programación III,Entrega del Trabajo Integrador,tpi,2026-11-21,pendiente,,,"Abre 16/11, cierra 23:59. Recuperatorio: 21 al 28/11.",,,,
-Probabilidad y Estadística,,,,cursando,,,,parciales|tpi|coloquio,Preguntas 5 a 8 del TAI aprobadas (para rendir el 2º parcial),2026-C2,Campus: https://tup.sied.utn.edu.ar/course/view.php?id=79 · Cada parcial tiene cuestionario y después coloquio. En el 1º parcial el cuestionario cerraba 1h30 después del turno de la tarde.
-Probabilidad y Estadística,Parcial 1 (cuestionario + coloquio),parcial,2026-09-29,aprobado,7,,,,,,
-Probabilidad y Estadística,Parcial 2 — Cuestionario,cuestionario,2026-11-17,pendiente,,Parcial 2,Turnos 10:00 o 19:00. Requiere preguntas 5 a 8 del TAI aprobadas. Recuperatorio: 24/11.,,,,
-Probabilidad y Estadística,Parcial 2 — Coloquio (18 al 20/11),coloquio,2026-11-18,pendiente,,Parcial 2,Recuperatorio: 25 al 27/11.,,,,
-Probabilidad y Estadística,1ª entrega — consignas 1 y 2,entrega,2026-08-23,aprobado,9,TAI,,,,,
-Probabilidad y Estadística,2ª entrega — consignas 3 y 4,entrega,2026-09-06,entregado,,TAI,Enviado para calificar.,,,,
-Probabilidad y Estadística,3ª entrega — consignas 5 a 7,entrega,2026-10-25,entregado,,TAI,Sin nota al 2/11. Confirmá si está aprobada: es requisito del 2º parcial.,,,,
-Probabilidad y Estadística,4ª entrega — pregunta 8,entrega,2026-11-15,pendiente,,TAI,PDF + archivo .R.,,,,
-Probabilidad y Estadística,Coloquio final integrador (30/11 al 4/12),coloquio,2026-11-30,pendiente,,TAI,"La sección del TAI dice hasta el 6/12; tomá el 4/12 como límite seguro.",,,,
-Metodología de Sistemas I,,,,cursando,,,,parciales|coloquio|tpi,,2026-C2,"Campus: https://tup.sied.utn.edu.ar/course/view.php?id=85 · Notas sobre 100. TP 1: la tabla dice 15/11 (recup. 19/11) pero el campus dice 26/11 (recup. 1/12); se usa la del campus."
-Metodología de Sistemas I,Parcial 1,parcial,2026-09-22,aprobado,97.5,,,,,,
-Metodología de Sistemas I,Parcial 2,parcial,2026-10-31,aprobado,100,,,,,,
-Metodología de Sistemas I,Coloquio 1 — 2º llamado (09:20),coloquio,2026-11-07,pendiente,,,Ventana del 5 al 7/11. Recuperatorio: 12 al 14/11.,,,,
-Metodología de Sistemas I,TP 1 — Trabajo Integrador,tpi,2026-11-26,pendiente,,,Cierra 23:59 según el campus. Recuperatorio: 1/12 23:59.,,,,
+﻿materia,titulo,tipo,desde,fecha,estado,nota,recupera,opcional,grupo,descripcion,modalidad,requisitos,periodo,apuntes,link
+cuatrimestre,,,,,,,,,,,,,2º cuatrimestre 2026,,
+Programación I,,,,,equivalencia,,,,,,,,,,
+Programación II,,,,,equivalencia,,,,,,,,,,
+Base de Datos I,,,,,equivalencia,,,,,,,,,,
+Inglés I,,,,,equivalencia,,,,,,,,,,
+Arquitectura y Sistemas Operativos,,,,,aprobada,8,,,,,,,2026-C1,,
+Matemática,,,,,aprobada,10,,,,,,,2026-C1,,
+Organización Empresarial,,,,,aprobada,10,,,,,,,2026-C1,,
+Base de Datos II,,,,,cursando,,,,,,parciales|tpi|coloquio,Tener completadas todas las unidades previas a cada parcial|Entregar los TPs con anticipación para que los corrijan a tiempo,2026-C2,"Grupo del TPI: 038
+Tutora: Aldana Iramaz
+Coloquio: virtual, con el enlace ""Unirse"" de la sección TPI
+Parciales y globalizador: de 08:00 a 23:00",https://tup.sied.utn.edu.ar/course/view.php?id=83
+Base de Datos II,Parcial 1,parcial,,2026-09-11,aprobado,9.5,,,,,,,,,
+Base de Datos II,Recuperatorio Parcial 1,recuperatorio,,2026-09-18,pendiente,,Parcial 1,,,,,,,,
+Base de Datos II,Parcial 2,parcial,,2026-10-16,aprobado,9,,,,,,,,,
+Base de Datos II,Recuperatorio Parcial 2,recuperatorio,,2026-10-23,pendiente,,Parcial 2,,,,,,,,
+Base de Datos II,Globalizador,final,,2026-11-13,pendiente,,,,,"08:00 a 23:00. Al 2/11 no estaba publicado; la fecha sale de la tabla de evaluaciones.",,,,,
+Base de Datos II,Elección de grupo,entrega,2026-10-01,2026-10-11,entregado,,,,TPI BD II,Grupo 038,,,,,
+Base de Datos II,TPI — Entrega 1ª instancia,tpi,2026-10-12,2026-10-31,aprobado,,,,TPI BD II,,,,,,
+Base de Datos II,TPI — Recuperación (2ª instancia),recuperatorio,,2026-11-08,pendiente,,TPI — Entrega 1ª instancia,,TPI BD II,,,,,,
+Base de Datos II,Coloquio del TPI (15:30),coloquio,,2026-11-04,pendiente,,,,TPI BD II,La fecha ya pasó: confirmá el resultado en el campus y marcalo.,,,,,
+Programación III,,,,,cursando,,,,,,parciales|tpi,Entrega de código del 2º parcial aprobada (habilita el cuestionario),2026-C2,"Notas: sobre 100
+Entrega de código: un único .zip, con el link del video en los comentarios
+Cuestionario del 2º parcial: por Zoom, turnos 09:00 o 18:00, con pregunta conceptual",https://tup.sied.utn.edu.ar/course/view.php?id=82
+Programación III,Parcial 1,parcial,2026-09-07,2026-09-19,aprobado,98,,,,Entrega,,,,,
+Programación III,Parcial 2 — Entrega de código,entrega,2026-11-02,2026-11-12,pendiente,,,,Parcial 2,Cierra 23:59. Un único .zip con el link del video en los comentarios.,,,,,
+Programación III,Recuperatorio — Entrega de código,recuperatorio,2026-11-16,2026-11-26,pendiente,,Parcial 2 — Entrega de código,,Parcial 2,,,,,,
+Programación III,Parcial 2 — Cuestionario por Zoom,cuestionario,,2026-11-14,pendiente,,,,Parcial 2,"Turnos 09:00 o 18:00, con pregunta conceptual. Requiere la entrega de código aprobada.",,,,,
+Programación III,Recuperatorio — Cuestionario,recuperatorio,,2026-11-28,pendiente,,Parcial 2 — Cuestionario por Zoom,,Parcial 2,Turnos 09:00 o 18:00.,,,,,
+Programación III,Entrega del Trabajo Integrador,tpi,2026-11-16,2026-11-21,pendiente,,,,,Cierra 23:59.,,,,,
+Programación III,Recuperatorio del Trabajo Integrador,recuperatorio,2026-11-21,2026-11-28,pendiente,,Entrega del Trabajo Integrador,,,,,,,,
+Probabilidad y Estadística,,,,,cursando,,,,,,parciales|tpi|coloquio,Preguntas 5 a 8 del TAI aprobadas (para rendir el 2º parcial),2026-C2,"Parciales: cada uno tiene cuestionario y después coloquio
+Turnos del cuestionario: 10:00 o 19:00 (en el 1º cerraba 1h30 después del turno de la tarde)
+Coloquio del TAI: la sección dice hasta el 6/12; tomé el 4/12 como límite seguro",https://tup.sied.utn.edu.ar/course/view.php?id=79
+Probabilidad y Estadística,Parcial 1 (cuestionario + coloquio),parcial,,2026-09-29,aprobado,7,,,,,,,,,
+Probabilidad y Estadística,Recuperatorio Parcial 1,recuperatorio,2026-10-06,2026-10-09,pendiente,,Parcial 1 (cuestionario + coloquio),,,Cuestionario el 6/10 y coloquio del 7 al 9/10.,,,,,
+Probabilidad y Estadística,Parcial 2 — Cuestionario,cuestionario,,2026-11-17,pendiente,,,,Parcial 2,Turnos 10:00 o 19:00. Requiere las preguntas 5 a 8 del TAI aprobadas.,,,,,
+Probabilidad y Estadística,Recuperatorio — Cuestionario,recuperatorio,,2026-11-24,pendiente,,Parcial 2 — Cuestionario,,Parcial 2,Turnos 10:00 o 19:00.,,,,,
+Probabilidad y Estadística,Parcial 2 — Coloquio,coloquio,2026-11-18,2026-11-20,pendiente,,,,Parcial 2,,,,,,
+Probabilidad y Estadística,Recuperatorio — Coloquio,recuperatorio,2026-11-25,2026-11-27,pendiente,,Parcial 2 — Coloquio,,Parcial 2,,,,,,
+Probabilidad y Estadística,1ª entrega — consignas 1 y 2,entrega,,2026-08-23,aprobado,9,,,TAI,,,,,,
+Probabilidad y Estadística,2ª entrega — consignas 3 y 4,entrega,,2026-09-06,entregado,,,,TAI,Enviado para calificar.,,,,,
+Probabilidad y Estadística,3ª entrega — consignas 5 a 7,entrega,,2026-10-25,entregado,,,,TAI,Sin nota al 2/11. Confirmá si está aprobada: es requisito del 2º parcial.,,,,,
+Probabilidad y Estadística,4ª entrega — pregunta 8,entrega,,2026-11-15,pendiente,,,,TAI,PDF + archivo .R.,,,,,
+Probabilidad y Estadística,Coloquio final integrador,coloquio,2026-11-30,2026-12-04,pendiente,,,,TAI,"La sección del TAI dice hasta el 6/12; tomá el 4/12 como límite seguro.",,,,,
+Metodología de Sistemas I,,,,,cursando,,,,,,parciales|coloquio|tpi,,2026-C2,"Notas: sobre 100
+TP 1: la tabla del curso dice 15/11 (recup. 19/11) pero el campus dice 26/11 (recup. 1/12); uso la del campus
+Parciales: turno mañana 10:00 o noche 20:00",https://tup.sied.utn.edu.ar/course/view.php?id=85
+Metodología de Sistemas I,Parcial 1,parcial,,2026-09-22,aprobado,97.5,,,,,,,,,
+Metodología de Sistemas I,Recuperatorio Parcial 1,recuperatorio,,2026-09-30,pendiente,,Parcial 1,,,Cierra 22:00.,,,,,
+Metodología de Sistemas I,Parcial 2,parcial,,2026-10-31,aprobado,100,,,,,,,,,
+Metodología de Sistemas I,Recuperatorio Parcial 2,recuperatorio,,2026-11-06,pendiente,,Parcial 2,,,,,,,,
+Metodología de Sistemas I,Coloquio 1 — 2º llamado (09:20),coloquio,2026-11-05,2026-11-07,pendiente,,,,,El 1º llamado fue del 12 al 14/10.,,,,,
+Metodología de Sistemas I,Recuperatorio Coloquio 1,recuperatorio,2026-11-12,2026-11-14,pendiente,,Coloquio 1 — 2º llamado (09:20),,,,,,,,
+Metodología de Sistemas I,TP 1 — Trabajo Integrador,tpi,,2026-11-26,pendiente,,,,,Cierra 23:59 según el campus.,,,,,
+Metodología de Sistemas I,Recuperatorio TP 1,recuperatorio,,2026-12-01,pendiente,,TP 1 — Trabajo Integrador,,,Cierra 23:59.,,,,,
